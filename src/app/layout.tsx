@@ -5,6 +5,7 @@ import { Inter as FontSans } from "next/font/google";
 import { cn } from "~/lib/utils";
 
 import { TRPCReactProvider } from "~/trpc/react";
+import Header from "~/components/header";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -24,14 +25,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
-      <body
-        className={cn(
-          "bg-background min-h-screen font-sans antialiased",
-          fontSans.variable,
-        )}
-      >
-        <TRPCReactProvider>{children}</TRPCReactProvider>
-      </body>
+      <TRPCReactProvider>
+        <Header fontSans={fontSans} />
+
+        <body
+          className={cn(
+            "bg-background flex flex-col font-sans antialiased",
+            fontSans.variable,
+          )}
+          style={{ height: "calc(100dvh - 45px)" }}
+        >
+          {children}
+        </body>
+      </TRPCReactProvider>
     </html>
   );
 }
