@@ -14,6 +14,9 @@ export function CreatePost() {
       router.refresh();
       setName("");
     },
+    onMutate: (obj) => {
+      console.log(obj);
+    },
   });
 
   return (
