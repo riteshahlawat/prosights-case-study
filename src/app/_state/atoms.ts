@@ -11,13 +11,13 @@ let storedSessionId;
 
 if (typeof window !== "undefined") {
     storedSessionId = localStorage.getItem("sessionId");
-}
 
-if (!storedSessionId) {
-    storedSessionId = createId();
-    if (typeof window !== "undefined") {
+    if (!storedSessionId) {
+        storedSessionId = createId();
         localStorage.setItem("sessionId", storedSessionId);
     }
+} else {
+    storedSessionId = "";
 }
 
 export const sessionIdAtom = atom(storedSessionId);

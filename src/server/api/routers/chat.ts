@@ -1,5 +1,7 @@
 import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
+import { ChatMessage } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
+import { Redis } from "@upstash/redis";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
@@ -19,6 +21,11 @@ const model = new ChatOpenAI({
     openAIApiKey: env.OPENAI_API_KEY,
 });
 
+const redis = new Redis({
+    url: env.UPSTASH_REDIS_REST_URL,
+    token: env.UPSTASH_REDIS_REST_TOKEN,
+});
+
 const prompt = ChatPromptTemplate.fromMessages([
     [
         "system",
@@ -32,7 +39,7 @@ const chain = RunnableSequence.from([prompt, model]);
 
 const chainWithHistory = new RunnableWithMessageHistory({
     runnable: chain,
-    getMessageHistory: async (sessionId) =>
+    getMessageHistory: async (sessionId: string) =>
         new UpstashRedisChatMessageHistory({
             sessionId,
             config: {
@@ -44,6 +51,11 @@ const chainWithHistory = new RunnableWithMessageHistory({
     historyMessagesKey: "history",
 });
 
+export type UpstashDataType = {
+    type: "human" | "ai";
+    data: ChatMessage;
+};
+
 export const chatRouter = createTRPCRouter({
     askQuestion: publicProcedure
         .input(
@@ -53,7 +65,6 @@ export const chatRouter = createTRPCRouter({
             }),
         )
         .mutation(async ({ input }) => {
-            console.log("hello");
             const message = await chainWithHistory.invoke(
                 {
                     input: input.question,
@@ -66,5 +77,21 @@ export const chatRouter = createTRPCRouter({
             );
 
             return { response: message.content };
+        }),
+
+    retrieveMessageHistory: publicProcedure
+        .input(
+            z.object({
+                sessionId: z.string().length(16),
+            }),
+        )
+        .query(async ({ input }) => {
+            const messageHistoryUpstash: UpstashDataType[] = await redis.lrange(
+                input.sessionId,
+                0,
+                -1,
+            );
+
+            return messageHistoryUpstash;
         }),
 });

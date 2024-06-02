@@ -4,9 +4,9 @@ import { GeistSans } from "geist/font/sans";
 import { Inter as FontSans } from "next/font/google";
 import { cn } from "~/lib/utils";
 
-import { TRPCReactProvider } from "~/trpc/react";
 import Header from "~/components/header";
 import { Toaster } from "~/components/ui/sonner";
+import { TRPCReactProvider } from "~/trpc/react";
 
 const fontSans = FontSans({
     subsets: ["latin"],
@@ -27,8 +27,6 @@ export default function RootLayout({
     return (
         <html lang="en" className={`${GeistSans.variable}`}>
             <TRPCReactProvider>
-                <Header fontSans={fontSans} />
-
                 <body
                     className={cn(
                         "flex flex-col bg-background font-sans antialiased",
@@ -36,6 +34,8 @@ export default function RootLayout({
                     )}
                     style={{ height: "calc(100dvh - 45px)" }}
                 >
+                    <Header />
+
                     {children}
                 </body>
                 <Toaster richColors closeButton />
