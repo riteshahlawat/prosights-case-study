@@ -1,10 +1,16 @@
+import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
+import { ChatOpenAI } from "@langchain/openai";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { ChatOpenAI } from "@langchain/openai";
-import { HumanMessage } from "@langchain/core/messages";
-import { InMemoryChatMessageHistory } from "@langchain/core/chat_history";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { RunnableWithMessageHistory } from "@langchain/core/runnables";
+
+import {
+    ChatPromptTemplate,
+    MessagesPlaceholder,
+} from "@langchain/core/prompts";
+import {
+    RunnableSequence,
+    RunnableWithMessageHistory,
+} from "@langchain/core/runnables";
 
 import { env } from "~/env";
 
@@ -13,46 +19,50 @@ const model = new ChatOpenAI({
     openAIApiKey: env.OPENAI_API_KEY,
 });
 
-const messageHistories: Record<string, InMemoryChatMessageHistory> = {};
-
 const prompt = ChatPromptTemplate.fromMessages([
     [
         "system",
         `You are a helpful assistant who remembers all details the user shares with you.`,
     ],
-    ["placeholder", "{chat_history}"],
+    new MessagesPlaceholder("history"),
     ["human", "{input}"],
 ]);
 
-const chain = prompt.pipe(model);
+const chain = RunnableSequence.from([prompt, model]);
 
-const withMessageHistory = new RunnableWithMessageHistory({
+const chainWithHistory = new RunnableWithMessageHistory({
     runnable: chain,
-    getMessageHistory: async (sessionId) => {
-        if (messageHistories[sessionId] === undefined) {
-            messageHistories[sessionId] = new InMemoryChatMessageHistory();
-        }
-        return messageHistories[sessionId]!;
-    },
+    getMessageHistory: async (sessionId) =>
+        new UpstashRedisChatMessageHistory({
+            sessionId,
+            config: {
+                url: env.UPSTASH_REDIS_REST_URL,
+                token: env.UPSTASH_REDIS_REST_TOKEN,
+            },
+        }),
     inputMessagesKey: "input",
-    historyMessagesKey: "chat_history",
+    historyMessagesKey: "history",
 });
-
-const config = {
-    configurable: {
-        sessionId: "abc2",
-    },
-};
 
 export const chatRouter = createTRPCRouter({
     askQuestion: publicProcedure
-        .input(z.object({ question: z.string().min(5) }))
+        .input(
+            z.object({
+                question: z.string().min(5),
+                sessionId: z.string().length(16),
+            }),
+        )
         .mutation(async ({ input }) => {
-            const message = await withMessageHistory.invoke(
+            console.log("hello");
+            const message = await chainWithHistory.invoke(
                 {
                     input: input.question,
                 },
-                config,
+                {
+                    configurable: {
+                        sessionId: input.sessionId,
+                    },
+                },
             );
 
             return { response: message.content };

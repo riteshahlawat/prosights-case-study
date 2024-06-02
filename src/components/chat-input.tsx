@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useAtomValue } from "jotai";
+import { SendHorizontal } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { sessionIdAtom } from "~/app/_state/atoms";
+import { api } from "~/trpc/react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { SendHorizontal } from "lucide-react";
-import { env } from "~/env";
-import { api } from "~/trpc/react";
-import { toast } from "sonner";
-
 export default function ChatInput() {
     const [question, setQuestion] = useState("");
+    const sessionId = useAtomValue(sessionIdAtom);
+
     const askQuestionMutation = api.chat.askQuestion.useMutation({
         onError(error) {
             toast.error(error.message);
@@ -21,7 +23,7 @@ export default function ChatInput() {
     });
 
     const askQuestion = () => {
-        askQuestionMutation.mutate({ question });
+        askQuestionMutation.mutate({ question, sessionId });
     };
 
     return (
