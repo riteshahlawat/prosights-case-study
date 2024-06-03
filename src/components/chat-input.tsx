@@ -46,6 +46,7 @@ export default function ChatInput() {
     return (
         <div className="mb-2 flex w-full flex-row justify-between pt-2">
             <Input
+                className="border-gray-300"
                 type="text"
                 disabled={askQuestionMutation.isPending}
                 placeholder="Ask your question here..."
@@ -54,7 +55,7 @@ export default function ChatInput() {
                 onChange={(e) => setQuestion(e.target.value)}
             />
             <Button
-                className="ml-2"
+                className="ml-2 border-gray-300"
                 variant="outline"
                 size="icon"
                 onKeyDown={onEnter}
