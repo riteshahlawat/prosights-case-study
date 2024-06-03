@@ -1,4 +1,6 @@
-# Prosights
+# Prosights Chatbot Case Study
+
+Live demo: <a href="https://prosights-case-study.vercel.app/" target="_blank">here</a>
 
 To run:
 
