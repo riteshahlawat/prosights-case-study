@@ -32,7 +32,30 @@ export default function ChatMessage({
             )}
             ref={divRef}
         >
-            <Markdown remarkPlugins={[remarkGfm]}>
+            <Markdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                    li: (props) => {
+                        const { children, className, node, ...rest } = props;
+                        return (
+                            <li className={clsx(className, "ml-4")} {...rest}>
+                                {children}
+                            </li>
+                        );
+                    },
+                    ol: (props) => {
+                        const { children, className, node, ...rest } = props;
+                        return (
+                            <ol
+                                className={clsx(className, "my-2 list-decimal")}
+                                {...rest}
+                            >
+                                {children}
+                            </ol>
+                        );
+                    },
+                }}
+            >
                 {message.data.content.toString()}
             </Markdown>
         </div>
