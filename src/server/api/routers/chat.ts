@@ -70,7 +70,7 @@ export const chatRouter = createTRPCRouter({
                 },
             );
 
-            console.log({ results });
+            // console.log({ results });
             const prompt = ChatPromptTemplate.fromMessages([
                 [
                     "system",
