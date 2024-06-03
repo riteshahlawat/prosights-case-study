@@ -23,7 +23,7 @@ export default function ChatMessage({
     return (
         <div
             className={clsx(
-                "mx-2 mt-3 w-fit max-w-[70%] items-center px-3 py-1.5 text-sm  lg:text-base ",
+                "mx-2 mt-3 w-fit max-w-[70%] items-center rounded-2xl px-3 py-1.5  text-sm lg:text-base ",
                 message.type === "ai" &&
                     "self-start rounded-tl-none bg-blue-100",
                 message.type === "human" &&
