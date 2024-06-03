@@ -18,7 +18,6 @@ export default function ChatMessage({
     useEffect(() => {
         if (index === numMessages - 1 && divRef.current) {
             divRef.current.scrollIntoView({ behavior: "smooth" });
-            console.log(message.data.content.toString());
         }
     }, [index, numMessages]);
     return (

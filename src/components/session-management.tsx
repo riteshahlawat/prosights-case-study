@@ -19,7 +19,7 @@ export default function SessionManagement() {
 
     return (
         sessionId !== "" && (
-            <div className="absolute right-3 top-0 mr-2 mt-2 flex flex-row items-center rounded  bg-zinc-800 p-1 text-sm text-zinc-50">
+            <div className="absolute right-3 top-0 mr-2 mt-2 flex flex-row items-center rounded  bg-zinc-800 p-1 text-sm text-zinc-50 ">
                 <h4 className="font-bold">Session ID:</h4>
                 <p className="ml-1 font-light">{sessionId}</p>
                 <div

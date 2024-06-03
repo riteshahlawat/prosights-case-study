@@ -36,7 +36,7 @@ export default function ChatWindowMessages() {
     }, [messageHistory.data]);
 
     return (
-        <div className="flex flex-col overflow-y-auto pb-3">
+        <div className="flex flex-col overflow-y-auto pb-3 pt-10 md:pt-0">
             {sortedMessageHistory?.map((message, i) => (
                 <ChatMessage
                     key={i}
