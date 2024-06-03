@@ -1,6 +1,9 @@
+import { AIMessage } from "@langchain/core/messages";
 import { useAtomValue } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { sessionIdAtom } from "~/app/_state/atoms";
+import { initialAIMessageContent } from "~/lib/constants";
+import { UpstashDataType } from "~/server/api/routers/chat";
 import { api } from "~/trpc/react";
 import ChatMessage from "./chat-message";
 
@@ -10,16 +13,30 @@ export default function ChatWindowMessages() {
         sessionId,
     });
 
-    const sortedMessageHistory = messageHistory.data
-        ?.map((item) => item)
-        .reverse();
+    const [sortedMessageHistory, setSortedMessageHistory] = useState<
+        UpstashDataType[]
+    >([]);
 
     useEffect(() => {
-        console.log(messageHistory.data);
+        if (messageHistory.data) {
+            if (messageHistory.data.length >= 1) {
+                setSortedMessageHistory(
+                    messageHistory.data.map((item) => item).reverse(),
+                );
+            } else {
+                // Add initial AI message manually
+                setSortedMessageHistory([
+                    {
+                        type: "ai",
+                        data: new AIMessage(initialAIMessageContent),
+                    },
+                ]);
+            }
+        }
     }, [messageHistory.data]);
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col overflow-y-auto mt-0">
             {sortedMessageHistory?.map((message) => (
                 <ChatMessage message={message} />
             ))}

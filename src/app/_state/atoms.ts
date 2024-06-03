@@ -2,7 +2,7 @@ import { init } from "@paralleldrive/cuid2";
 import "client-only";
 import { atom } from "jotai";
 
-const createId = init({
+export const createId = init({
     random: Math.random,
     length: 16,
 });

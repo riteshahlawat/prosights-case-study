@@ -1,5 +1,5 @@
 import { UpstashRedisChatMessageHistory } from "@langchain/community/stores/message/upstash_redis";
-import { ChatMessage } from "@langchain/core/messages";
+import { AIMessage, BaseMessage } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
 import { Redis } from "@upstash/redis";
 import { z } from "zod";
@@ -15,6 +15,7 @@ import {
 } from "@langchain/core/runnables";
 
 import { env } from "~/env";
+import { initialAIMessageContent } from "~/lib/constants";
 
 const model = new ChatOpenAI({
     model: "gpt-4o",
@@ -39,21 +40,29 @@ const chain = RunnableSequence.from([prompt, model]);
 
 const chainWithHistory = new RunnableWithMessageHistory({
     runnable: chain,
-    getMessageHistory: async (sessionId: string) =>
-        new UpstashRedisChatMessageHistory({
+    getMessageHistory: async (sessionId: string) => {
+        const history = new UpstashRedisChatMessageHistory({
             sessionId,
             config: {
                 url: env.UPSTASH_REDIS_REST_URL,
                 token: env.UPSTASH_REDIS_REST_TOKEN,
             },
-        }),
+        });
+
+        const messages = await history.getMessages();
+
+        if (messages.length === 0) {
+            await history.addMessage(new AIMessage(initialAIMessageContent));
+        }
+        return history;
+    },
     inputMessagesKey: "input",
     historyMessagesKey: "history",
 });
 
 export type UpstashDataType = {
     type: "human" | "ai";
-    data: ChatMessage;
+    data: BaseMessage;
 };
 
 export const chatRouter = createTRPCRouter({

@@ -25,7 +25,7 @@ export default function ChatWindow() {
     return (
         <div
             className={clsx(
-                "flex h-full flex-col border relative",
+                "flex h-full min-h-0 flex-col border border-gray-100 rounded-md relative",
                 messageHistory.isLoading && "justify-center items-center",
             )}
         >

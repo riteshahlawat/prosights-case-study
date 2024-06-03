@@ -1,7 +1,7 @@
 "use client";
 
 import { useAtomValue } from "jotai";
-import { SendHorizontal } from "lucide-react";
+import { Loader2, SendHorizontal } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { sessionIdAtom } from "~/app/_state/atoms";
@@ -12,13 +12,16 @@ export default function ChatInput() {
     const [question, setQuestion] = useState("");
     const sessionId = useAtomValue(sessionIdAtom);
 
+    const utils = api.useUtils();
+
     const askQuestionMutation = api.chat.askQuestion.useMutation({
         onError(error) {
             toast.error(error.message);
         },
 
-        onSuccess: (data) => {
-            console.log(data.response);
+        onSettled: () => {
+            utils.chat.retrieveMessageHistory.invalidate();
+            setQuestion("");
         },
     });
 
@@ -26,17 +29,38 @@ export default function ChatInput() {
         askQuestionMutation.mutate({ question, sessionId });
     };
 
+    const renderSendIcon = () => {
+        if (askQuestionMutation.isPending) {
+            return <Loader2 className="size-4 animate-spin" />;
+        }
+        return <SendHorizontal className="size-4" onClick={askQuestion} />;
+    };
+
+    const onEnter = (
+        e: React.KeyboardEvent<HTMLInputElement | HTMLButtonElement>,
+    ) => {
+        if (e.key === "Enter") {
+            askQuestion();
+        }
+    };
     return (
         <div className="mb-2 flex w-full flex-row justify-between pt-2">
             <Input
                 type="text"
+                disabled={askQuestionMutation.isPending}
                 placeholder="Ask your question here..."
-                className=""
+                onKeyDown={onEnter}
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
             />
-            <Button className="ml-2" variant="outline" size="icon">
-                <SendHorizontal className="size-4" onClick={askQuestion} />
+            <Button
+                className="ml-2"
+                variant="outline"
+                size="icon"
+                onKeyDown={onEnter}
+                disabled={askQuestionMutation.isPending}
+            >
+                {renderSendIcon()}
             </Button>
         </div>
     );
