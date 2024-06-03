@@ -17,7 +17,7 @@ const pineconeIndex = pinecone.Index(env.PINECONE_INDEX);
  */
 const loadDocsFromFileSystem = async () => {
     const files = await readdir(process.cwd() + "/public/knowledge_base");
-    const docs: Document<Record<string, any>>[] = [];
+    const docs: Document<Record<string, string>>[] = [];
     const textSplitter = new RecursiveCharacterTextSplitter({
         chunkSize: 1000,
         chunkOverlap: 200,

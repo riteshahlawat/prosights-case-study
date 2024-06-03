@@ -19,8 +19,8 @@ export default function ChatInput() {
             toast.error(error.message);
         },
 
-        onSettled: () => {
-            utils.chat.retrieveMessageHistory.invalidate();
+        onSettled: async () => {
+            await utils.chat.retrieveMessageHistory.invalidate();
             setQuestion("");
         },
     });

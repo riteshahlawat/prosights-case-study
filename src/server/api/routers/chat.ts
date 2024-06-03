@@ -48,6 +48,10 @@ export type UpstashDataType = {
     data: BaseMessage;
 };
 
+type LLMInput = {
+    input: string;
+    history?: string;
+};
 export const chatRouter = createTRPCRouter({
     askQuestion: publicProcedure
         .input(
@@ -87,8 +91,8 @@ export const chatRouter = createTRPCRouter({
 
             const chain = RunnableSequence.from([
                 {
-                    input: (input) => input.input,
-                    history: (input) => input.history,
+                    input: (input: LLMInput) => input.input,
+                    history: (input: LLMInput) => input?.history,
                     context: () => formatDocumentsAsString(results),
                 },
                 prompt,
